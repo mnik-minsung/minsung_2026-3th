@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 판단 점검 · 수업 과제 데모</title>
+<meta name="description" content="급락과 업종별 엇갈림이 겹친 날, 과거 사건에서 내 업종이 어떻게 움직였는지 보고 내 판단 이유를 한 줄로 남기는 수업 과제 데모입니다. 투자 판단의 근거가 아닙니다.">
+<!-- 외부 글꼴·CDN·이미지·fetch 없이 이 파일 하나로 동작합니다. -->
+<style>
+:root{
+  --ink:#1c2430; --sub:#5a6577; --line:#e3e7ee; --bg:#f4f6fa; --card:#ffffff;
+  --brand:#27407f; --brand-soft:#e7ecf8; --warn:#c2611a; --warn-soft:#fdf0e4;
+  --down:#b3261e; --up:#1b6b45;
+  --radius:24px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;
+  line-height:1.6;-webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:anywhere}
+a{color:var(--brand)}
+.wrap{max-width:960px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:5;background:rgba(244,246,250,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{font-weight:800;letter-spacing:-.02em}
+.tag{font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:999px;padding:4px 10px;font-weight:700}
+section{padding:88px 0}
+section + section{border-top:1px solid var(--line)}
+.eyebrow{font-size:14px;font-weight:700;color:var(--brand);margin:0 0 12px}
+h1{font-size:clamp(32px,6.4vw,60px);line-height:1.2;letter-spacing:-.03em;margin:0 0 20px}
+h2{font-size:clamp(26px,4.6vw,40px);line-height:1.28;letter-spacing:-.025em;margin:0 0 16px}
+h3{font-size:18px;margin:0 0 8px}
+p{margin:0 0 12px}
+.lead{font-size:clamp(17px,2.4vw,21px);color:var(--sub);max-width:34em}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 32px;border-radius:16px;
+  font-size:18px;font-weight:800;text-decoration:none;border:0;cursor:pointer}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.primary:hover{background:#1f3368}
+.btn.disabled{background:#d7dce6;color:#5a6577;cursor:not-allowed}
+.btn:focus-visible,a:focus-visible{outline:3px solid #f0a35e;outline-offset:3px}
+.note{font-size:13px;color:var(--sub)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:28px 0}
+.card{background:var(--card);border-radius:var(--radius);padding:28px;box-shadow:0 1px 2px rgba(20,33,61,.06)}
+.big{font-size:clamp(44px,9vw,72px);font-weight:900;letter-spacing:-.04em;line-height:1.05;margin:4px 0 8px}
+.big.down{color:var(--down)} .big.up{color:var(--up)}
+.card .what{font-weight:700;margin:0}
+.card .src{font-size:12.5px;color:var(--sub);margin:10px 0 0}
+svg{max-width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse;font-size:15px;background:var(--card);border-radius:var(--radius);overflow:hidden}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#eef1f7;font-size:13px}
+tr:last-child td{border-bottom:0}
+.tablewrap{overflow-x:auto;border-radius:var(--radius)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.pill{display:inline-block;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px;background:var(--brand-soft);color:var(--brand);margin-right:6px}
+.pill.hyp{background:var(--warn-soft);color:var(--warn)}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:24px 0}
+.flow .step{background:var(--card);border-radius:20px;padding:20px;position:relative}
+.flow .step b{display:block;margin-bottom:6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.chip{border:2px solid var(--line);border-radius:999px;padding:6px 16px;font-weight:700;background:#fff}
+.chip.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+.mock{background:var(--card);border-radius:var(--radius);padding:24px;border:2px dashed #c6cddd;position:relative}
+.mock .badge{position:absolute;top:-12px;left:20px}
+.mock .row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:8px 0;font-size:15px}
+.mock .q{margin:14px 0 4px;font-weight:700}
+.mock .opt{display:inline-block;border:1px solid var(--line);border-radius:10px;padding:4px 12px;margin:2px 4px 2px 0;font-size:14px}
+.mock .opt.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:700}
+.testgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:18px 0}
+.test{background:var(--card);border-radius:16px;padding:14px;text-align:center;font-size:14px}
+.test b{display:block;font-size:20px;color:var(--sub)}
+ul.clean{padding-left:20px;margin:8px 0}
+ul.clean li{margin:6px 0}
+footer{background:#161d2b;color:#cfd6e4;padding:56px 0}
+footer a{color:#a9c1ff}
+footer h3{color:#fff}
+footer .note{color:#aeb7c8}
+.ban{display:inline-block;background:#fff;color:#161d2b;font-weight:800;border-radius:12px;padding:8px 14px;margin-bottom:18px}
+@media (max-width:520px){section{padding:64px 0}.wrap{padding:0 16px}.card{padding:22px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="brand">내 판단 점검</span>
+    <span class="tag">수업 과제 데모</span>
+  </div>
+</header>
+
+<main>
+
+<!-- ① 한 줄 소개 · Attention -->
+<section id="hero" aria-labelledby="h-hero">
+  <div class="wrap">
+    <p class="eyebrow">2026년 3월 이란 전쟁 국면</p>
+    <h1 id="h-hero">급락과 방산 급등이 겹친 날,<br>내 판단을 돌아볼 기준이 있었나요?</h1>
+    <p class="lead">과거 사건에서 내 업종이 어떻게 움직였는지 출처와 함께 보고, 내 판단 이유를 한 줄로 남겨요.</p>
+    <p style="margin-top:28px"><a class="btn primary" href="#demo">내 판단 점검해 보기</a></p>
+    <p class="note" style="margin-top:14px">매수·매도를 추천하지 않아요. 이 숫자는 교육용 참고이며 투자 판단의 근거가 아니에요.</p>
+  </div>
+</section>
+
+<!-- ② 데이터로 본 문제 -->
+<section id="data" aria-labelledby="h-data">
+  <div class="wrap">
+    <p class="eyebrow">데이터로 본 문제</p>
+    <h2 id="h-data">하루에 시장이 12% 넘게 빠지던 날,<br>업종마다 움직임이 달랐어요</h2>
+
+    <div class="cards">
+      <div class="card">
+        <p class="what">코스피(시장 전체)</p>
+        <p class="big down">−12.06%</p>
+        <p>5,791.91 → 5,093.54 <span class="note">(2026-03-04 종가 · 종전 최대 하락률 12.02%)</span></p>
+        <svg viewBox="0 0 260 120" role="img" aria-label="코스피 전일 종가 5,791.91과 당일 종가 5,093.54 막대 비교. 세로축은 0에서 시작합니다.">
+          <line x1="10" y1="100" x2="250" y2="100" stroke="#c6cddd"/>
+          <rect x="40" y="10" width="70" height="90" rx="8" fill="#9fb0d8"/>
+          <rect x="150" y="21" width="70" height="79" rx="8" fill="#27407f"/>
+          <text x="75" y="115" text-anchor="middle" font-size="11" fill="#5a6577">전일 5,791.91</text>
+          <text x="185" y="115" text-anchor="middle" font-size="11" fill="#5a6577">종가 5,093.54</text>
+        </svg>
+        <p class="src">출처: 다음 마켓시그널 기사(2026-03-04). 계산: 698.37 ÷ 5,791.91 ≈ 12.06%. 막대는 0에서 시작.</p>
+      </div>
+      <div class="card">
+        <p class="what">원/달러 환율(기간별 변화)</p>
+        <p class="big up" style="color:var(--warn)">+5.74%</p>
+        <p>1,441.97 → 1,524.80원 <span class="note">(2026-02-27 → 2026-03-31)</span></p>
+        <svg viewBox="0 0 260 120" role="img" aria-label="원 달러 환율 2월 27일 1,441.97원과 3월 31일 1,524.80원 막대 비교. 세로축은 0에서 시작합니다.">
+          <line x1="10" y1="100" x2="250" y2="100" stroke="#c6cddd"/>
+          <rect x="40" y="15" width="70" height="85" rx="8" fill="#f0c9a3"/>
+          <rect x="150" y="10" width="70" height="90" rx="8" fill="#c2611a"/>
+          <text x="75" y="115" text-anchor="middle" font-size="11" fill="#5a6577">02-27 1,441.97</text>
+          <text x="185" y="115" text-anchor="middle" font-size="11" fill="#5a6577">03-31 1,524.80</text>
+        </svg>
+        <p class="src">출처: Frankfurter API(유럽중앙은행 ECB 기준환율). 계산식: (1,524.80 − 1,441.97) ÷ 1,441.97 ≈ +5.74%. 막대는 0에서 시작.</p>
+      </div>
+    </div>
+
+    <h3>같은 국면, 업종별로 이렇게 달랐어요</h3>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>업종</th><th>종목</th><th>움직임</th><th>기준일 · 출처</th></tr></thead>
+      <tbody>
+        <tr><td>반도체</td><td>삼성전자</td><td>3/3 −9.88% → 3/4 −11.74% (이틀 누적 −20.46%)</td><td>2026-03-03 · 2026-03-04 · 뉴시스, 경향신문</td></tr>
+        <tr><td>반도체</td><td>SK하이닉스</td><td>3/3 −11.5% → 3/4 −9.58% (이틀 누적 −19.98%)</td><td>2026-03-03 · 2026-03-04 · 뉴시스, 경향신문</td></tr>
+        <tr><td>방산</td><td>LIG넥스원, 한화시스템</td><td>상한가 (천궁-II 관련)</td><td>2026-03-03 · 뉴스1</td></tr>
+        <tr><td>방산</td><td>한화에어로스페이스 등 5종목</td><td>장중 +11.83% ~ 약 +30% (한화에어로스페이스 +20%, 현대로템 +16.05%, 한화시스템 +25.18%, 풍산 +11.83%, LIG넥스원 약 +30%)</td><td>2026-03-03 오전 9시 49분 기준(장중) · 헤럴드경제</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="note" style="margin-top:10px">날짜가 다르고 방산은 장중 수치라 같은 잣대로 비교할 수 없어요.</p>
+
+    <p style="margin-top:28px"><span class="pill">해석</span>같은 국면에서 시장 전체와 반도체 대형주는 크게 떨어지고 방산 일부는 상한가를 기록해, 업종별 움직임이 엇갈렸어요.</p>
+    <p><span class="pill hyp">한계</span>이 숫자는 언론 보도이며 한국거래소 원자료가 아니고, 개인이 불안했는지나 어떤 판단이 옳았는지는 말해 주지 않아요.</p>
+  </div>
+</section>
+
+<!-- ③ 누구의 어떤 순간 · Interest -->
+<section id="who" aria-labelledby="h-who">
+  <div class="wrap">
+    <p class="eyebrow">누구의 어떤 순간 <span class="pill hyp" style="margin-left:6px">가설 · 가상 인물</span></p>
+    <h2 id="h-who">근무 중에 급락 알림을 봤는데,<br>퇴근길에야 상황을 봤어요</h2>
+    <p class="lead">김민준(가명, 30대 초반 IT 직장인)은 반도체 대형주를 들고 있어요. 회의 중이라 바로 확인하지 못했고, 퇴근길에 반도체는 빠지고 방산은 오른 걸 봤어요. 팔지 않고 버텼고 일부는 더 샀지만, 그 판단이 맞았는지 돌아볼 기준이 없었어요.</p>
+
+    <div class="two" style="margin-top:24px">
+      <div class="card">
+        <h3>지금은 이렇게 해요</h3>
+        <ul class="clean">
+          <li>증권사 앱 뉴스, 종목 커뮤니티, 유튜브 시황, 지인 조언을 따로따로 봐요.</li>
+          <li>일부 증권사 앱은 보유 종목 요약과 이슈·산업 영향 분석을 이미 제공해요(언론 보도 기준).</li>
+          <li>그래도 「과거 사건과 비교」하고 「내 판단을 점검」하는 흐름은 확인하지 못했어요(앱을 직접 써 보기 전이라 가설).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>이 사람의 감정 흐름 <span class="note">(1 불안 – 5 차분)</span></h3>
+        <svg viewBox="0 0 300 150" role="img" aria-label="감정 변화: 1단계 2, 2단계 3, 3단계 2, 4단계 4. 가장 낮은 점은 단계 3의 과거 사건 카드 보기입니다.">
+          <line x1="20" y1="120" x2="290" y2="120" stroke="#c6cddd"/>
+          <polyline points="40,90 120,60 200,90 270,30" fill="none" stroke="#27407f" stroke-width="3"/>
+          <circle cx="40" cy="90" r="6" fill="#27407f"/><circle cx="120" cy="60" r="6" fill="#27407f"/>
+          <circle cx="200" cy="90" r="9" fill="#c2611a"/><circle cx="270" cy="30" r="6" fill="#27407f"/>
+          <text x="40" y="140" text-anchor="middle" font-size="11" fill="#5a6577">1 사건 인지</text>
+          <text x="120" y="140" text-anchor="middle" font-size="11" fill="#5a6577">2 업종 선택</text>
+          <text x="200" y="140" text-anchor="middle" font-size="11" fill="#c2611a" font-weight="700">3 카드 보기</text>
+          <text x="270" y="140" text-anchor="middle" font-size="11" fill="#5a6577">4 판단 점검</text>
+        </svg>
+        <p class="note" style="margin-top:8px"><b>가장 낮은 순간(3)</b>: 과거 기록을 봤지만 확실한 답이 없어 막막해져요. 그래서 카드마다 「이 카드로 알 수 없는 것」을 적고, 바로 아래에 점검 질문을 둬요. (가설)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ F-01 시연 · Desire + Action -->
+<section id="demo" aria-labelledby="h-demo">
+  <div class="wrap">
+    <p class="eyebrow">F-01 시연</p>
+    <h2 id="h-demo">과거 사건 카드를 보고,<br>내 판단 이유를 한 줄로 남겨요</h2>
+    <p class="lead">정답을 알려 주는 게 아니에요. 내 이유를 정리하는 도구예요.</p>
+
+    <div class="flow" aria-label="기존 대안에서 F-01 결과까지 3단계">
+      <div class="step"><b>1. 지금</b>뉴스·커뮤니티·유튜브를 따로 보고, 내 판단이 맞았는지 돌아볼 기준이 없어요.</div>
+      <div class="step"><b>2. F-01</b>내 업종을 고르면 2026-03 카드에서 출처·기준일과 「알 수 없는 것」을 함께 봐요.</div>
+      <div class="step"><b>3. 결과</b>점검 질문 3개에 답하고, 내 이유를 한 줄 메모로 남겨요.</div>
+    </div>
+
+    <div class="mock" aria-label="앱 미리보기 (동작하지 않는 그림입니다)">
+      <span class="pill hyp badge">미리보기 · 아직 눌러 볼 수 없어요</span>
+      <p style="font-weight:800;margin:6px 0 4px">내가 가진 업종을 골라 주세요</p>
+      <div class="chips"><span class="chip on">반도체</span><span class="chip">방산</span></div>
+      <div class="row"><span>코스피(시장 전체)</span><b>−12.06%</b></div>
+      <div class="row"><span>삼성전자</span><b>3/3 −9.88% → 3/4 −11.74%</b></div>
+      <div class="row"><span>SK하이닉스</span><b>3/3 −11.5% → 3/4 −9.58%</b></div>
+      <p class="note" style="margin-top:10px">▸ 이 카드로 알 수 없는 것: 하락 원인을 하나로 단정할 수 없어요. 사건이 끝난 뒤 움직임은 이 카드에 없어요. 개인이 많이 산 것이 옳은 판단이었는지는 알 수 없어요.</p>
+      <p class="q">3월 급락 때 내 판단은 어땠나요?</p>
+      <span class="opt on">버텼어요</span><span class="opt">더 샀어요</span><span class="opt">일부 팔았어요</span><span class="opt">아직 정하지 못했어요</span>
+      <p class="q">그때의 이유는 지금도 같나요?</p>
+      <span class="opt on">같아요</span><span class="opt">달라졌어요</span><span class="opt">모르겠어요</span>
+      <p class="q">그 이유를 한 줄로 적어 주세요.</p>
+      <p style="border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0">실적 전망이 그대로라서</p>
+    </div>
+
+    <p style="margin-top:28px">
+      <!-- M6-02에서 app.html이 만들어지면 아래 span을 <a class="btn primary" href="./app.html">시연 보기</a> 로 바꿉니다. -->
+      <span class="btn disabled" role="link" aria-disabled="true">시연 보기 · 준비 중</span>
+    </p>
+    <p class="note">앱 화면(app.html)은 다음 단계(M6-02)에서 만들어요. 그때까지는 위 그림으로 미리 볼 수 있어요.</p>
+  </div>
+</section>
+
+<!-- ⑤ 테스트 결과 (자리만) -->
+<section id="tests" aria-labelledby="h-tests">
+  <div class="wrap">
+    <p class="eyebrow">테스트 결과</p>
+    <h2 id="h-tests">아직 하나도 실행하지 않았어요</h2>
+    <p class="lead">설계는 끝났고 실행은 앱을 만든 뒤에 해요. 실행하기 전에는 「통과」라고 쓰지 않아요.</p>
+    <div class="testgrid" aria-label="테스트 10개 모두 미실행">
+      <div class="test"><b>UT-01</b>미실행</div><div class="test"><b>UT-02</b>미실행</div>
+      <div class="test"><b>UT-03</b>미실행</div><div class="test"><b>UT-04</b>미실행</div>
+      <div class="test"><b>UT-05</b>미실행</div><div class="test"><b>IT-01</b>미실행</div>
+      <div class="test"><b>IT-02</b>미실행</div><div class="test"><b>IT-03</b>미실행</div>
+      <div class="test"><b>IT-04</b>미실행</div><div class="test"><b>IT-05</b>미실행</div>
+    </div>
+    <p class="note">실제 결과는 실행한 뒤 테스트 기록(test_log)에 적어요. 테스트가 통과해도 사용자 문제가 해결됐다는 뜻은 아니에요.</p>
+  </div>
+</section>
+
+<!-- ⑥ 활용 방안 · 현업 적용 · 다음 개선 -->
+<section id="next" aria-labelledby="h-next">
+  <div class="wrap">
+    <p class="eyebrow">활용 방안 · 현업 적용 · 다음 개선</p>
+    <h2 id="h-next">이렇게 쓰이고, 이렇게 넓혀 볼 수 있어요</h2>
+    <div class="two" style="margin-top:20px">
+      <div class="card">
+        <span class="pill hyp">가설</span>
+        <h3>활용 방안</h3>
+        <p>사건이 터진 날, 개인투자자가 과거 사건 기록을 보며 자기 판단 이유를 한 줄로 남겨요. 다음 사건이 오면 지난 메모를 다시 봐요.</p>
+      </div>
+      <div class="card">
+        <span class="pill hyp">가설</span>
+        <h3>현업 적용</h3>
+        <p>증권사 앱의 이슈·보유 종목 요약 옆에 「과거 사건 카드 + 판단 점검」을 붙이는 방식이에요. 비슷한 요약 기능이 이미 있어서, 차이는 「과거 비교와 점검」인지 확인이 필요해요.</p>
+      </div>
+      <div class="card">
+        <h3>다음 개선</h3>
+        <ul class="clean">
+          <li>사건을 2022년 러시아 침공, 2025년 이스라엘–이란으로 넓히기(F-02)</li>
+          <li>반도체 대형주를 가진 개인투자자 5명에게 시연하고 확인 질문 1개 묻기</li>
+          <li>화면 표현이 투자 권유·자문으로 읽히지 않는지 법적 확인</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>아직 확인하지 못한 것</h3>
+        <ul class="clean">
+          <li>사용자가 실제로 불안했고 점검 기준이 없다고 느끼는지</li>
+          <li>이 방식에 돈을 낼 사람이 있는지</li>
+          <li>한국거래소 원자료와의 대조</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ⑦ 하단 -->
+<footer>
+  <div class="wrap">
+    <p class="ban">수업 과제 데모 · 투자 판단 근거 아님</p>
+    <p>이 페이지의 숫자는 교육용 참고입니다. 매수·매도를 추천하지 않으며, 근거는 언론 보도와 공개 자료(한국거래소 원자료 아님)입니다. 아직 실제 사용자에게 검증하지 않았습니다.</p>
+    <h3 style="margin-top:24px">출처 (2026-09-19 확인 기준)</h3>
+    <ul class="clean note">
+      <li>코스피 −12.06%, 2026-03-04 종가: <a href="https://v.daum.net/v/20260304163026423" target="_blank" rel="noopener noreferrer">다음 마켓시그널</a></li>
+      <li>원/달러 2026-02-27, 03-31: <a href="https://api.frankfurter.dev/v1/2026-03-31?base=USD&amp;symbols=KRW" target="_blank" rel="noopener noreferrer">Frankfurter API (ECB 기준환율)</a></li>
+      <li>삼성전자·SK하이닉스 3/4: <a href="https://www.khan.co.kr/en/article/202603041624007" target="_blank" rel="noopener noreferrer">경향신문</a> · 3/3: <a href="https://m.news.nate.com/view/20260303n28374" target="_blank" rel="noopener noreferrer">뉴시스(네이트)</a></li>
+      <li>방산 장중 등락: <a href="https://biz.heraldcorp.com/article/10685491" target="_blank" rel="noopener noreferrer">헤럴드경제</a> · 상한가: <a href="https://www.news1.kr/finance/general-stock/6088844" target="_blank" rel="noopener noreferrer">뉴스1</a></li>
+    </ul>
+    <p class="note">김민준은 가상 인물이며 실제 인터뷰가 아닙니다. 디자인은 「한 화면에 한 메시지·큰 숫자·큰 버튼」 원칙만 참고했고, 다른 서비스의 로고·글꼴·이미지·문구를 쓰지 않았습니다.</p>
+  </div>
+</footer>
+
+</body>
+</html>
