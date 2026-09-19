@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 판단 점검 · 시연 앱 (수업 과제 데모)</title>
+<!-- 외부 글꼴·CDN·이미지·fetch 없이 app.html + data.js + app.js 로 동작합니다. 더블클릭으로 열 수 있어요. -->
+<style>
+:root{--ink:#1c2430;--sub:#5a6577;--line:#e3e7ee;--bg:#f4f6fa;--card:#fff;--brand:#27407f;--brand-soft:#e7ecf8;
+  --warn:#c2611a;--warn-soft:#fdf0e4;--down:#b3261e;--up:#1b6b45;--radius:24px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;
+  line-height:1.6;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);background:rgba(244,246,250,.92)}
+header .wrap{display:flex;justify-content:space-between;align-items:center;height:56px}
+.brand{font-weight:800}
+.tag{font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:999px;padding:4px 10px;font-weight:700}
+main{padding:36px 0 48px}
+h1{font-size:clamp(26px,5vw,38px);line-height:1.25;letter-spacing:-.025em;margin:0 0 8px}
+h2{font-size:clamp(20px,3.6vw,26px);margin:0 0 16px;letter-spacing:-.02em}
+h3{font-size:17px;margin:0 0 8px}
+p{margin:0 0 10px}
+.lead{color:var(--sub)}
+.panel{background:var(--card);border-radius:var(--radius);padding:24px;margin:18px 0;box-shadow:0 1px 2px rgba(20,33,61,.06)}
+label.field,.qtitle{display:block;font-weight:800;margin:0 0 8px}
+select,input[type=text]{width:100%;min-height:48px;border:2px solid var(--line);border-radius:14px;padding:0 14px;font-size:16px;background:#fff;color:var(--ink)}
+select:focus,input[type=text]:focus{outline:3px solid #f0a35e;outline-offset:2px;border-color:var(--brand)}
+.placeholder{color:var(--sub);margin:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px}
+.numcard{border:1px solid var(--line);border-radius:20px;padding:18px}
+.what{font-weight:700;margin:0 0 4px}
+.big{font-size:clamp(38px,9vw,56px);font-weight:900;letter-spacing:-.04em;line-height:1.05;margin:0 0 6px}
+.big.down{color:var(--down)}.big.up{color:var(--up)}.big.warnc{color:var(--warn)}
+.src{font-size:12.5px;color:var(--sub);margin:6px 0 0}
+.fact{border-top:1px solid var(--line);padding:12px 0}
+.fact .val{font-weight:700;margin:0}
+.unknown{background:var(--warn-soft);border-radius:16px;padding:16px 18px;margin-top:14px}
+.unknown ul{margin:6px 0 0;padding-left:20px}
+.unknown li{margin:4px 0;font-size:15px}
+fieldset{border:0;padding:0;margin:0 0 18px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts label{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:14px;padding:10px 16px;cursor:pointer;background:#fff;font-weight:600}
+.opts input{accent-color:var(--brand);width:18px;height:18px}
+.opts label:has(input:checked){border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+.opts label:focus-within{outline:3px solid #f0a35e;outline-offset:2px}
+.help{font-size:12.5px;color:var(--sub);margin:6px 0 0}
+.err{color:var(--warn);font-size:14px;font-weight:700;margin:6px 0 0}
+.err:empty{margin:0}
+.err:not(:empty)::before{content:"\26A0  "}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 32px;border-radius:16px;font-size:18px;font-weight:800;border:0;cursor:pointer;background:var(--brand);color:#fff}
+.btn:hover{background:#1f3368}
+.btn:focus-visible{outline:3px solid #f0a35e;outline-offset:3px}
+.ok{color:var(--up);font-weight:800}
+.summary{font-weight:700}
+#prev,#result{margin-top:16px}
+footer{background:#161d2b;color:#cfd6e4;padding:28px 0;font-size:14px}
+footer .ban{display:inline-block;background:#fff;color:#161d2b;font-weight:800;border-radius:12px;padding:6px 12px;margin-bottom:10px}
+@media (max-width:520px){.wrap{padding:0 16px}.panel{padding:20px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><span class="brand">내 판단 점검</span><span class="tag">수업 과제 데모</span></div></header>
+
+<main id="app">
+  <div class="wrap">
+    <h1>과거 사건 카드를 보고,<br>내 판단 이유를 한 줄로 남겨요</h1>
+    <p class="lead">정답을 알려 주는 게 아니에요. 내 이유를 정리하는 도구예요. 매수·매도를 추천하지 않아요.</p>
+
+    <section class="panel" aria-labelledby="l-sector">
+      <label class="field" id="l-sector" for="sector">내가 가진 업종을 골라 주세요</label>
+      <select id="sector">
+        <option value="">업종을 골라 주세요</option>
+        <option value="반도체">반도체</option>
+        <option value="방산">방산</option>
+      </select>
+      <p class="err" id="err-sector" role="alert"></p>
+    </section>
+
+    <section class="panel" aria-live="polite">
+      <div id="card"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="l-check">
+      <h2 id="l-check">내 판단 점검</h2>
+
+      <fieldset>
+        <legend class="qtitle">3월 급락 때 내 판단은 어땠나요?</legend>
+        <div class="opts">
+          <label><input type="radio" name="q1" value="버텼어요">버텼어요</label>
+          <label><input type="radio" name="q1" value="더 샀어요">더 샀어요</label>
+          <label><input type="radio" name="q1" value="일부 팔았어요">일부 팔았어요</label>
+          <label><input type="radio" name="q1" value="아직 정하지 못했어요">아직 정하지 못했어요</label>
+        </div>
+        <p class="err" id="err-q1" role="alert"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend class="qtitle">그때의 이유는 지금도 같나요?</legend>
+        <div class="opts">
+          <label><input type="radio" name="q2" value="같아요">같아요</label>
+          <label><input type="radio" name="q2" value="달라졌어요">달라졌어요</label>
+          <label><input type="radio" name="q2" value="모르겠어요">모르겠어요</label>
+        </div>
+        <p class="err" id="err-q2" role="alert"></p>
+      </fieldset>
+
+      <div style="margin-bottom:18px">
+        <label class="qtitle" for="q3">그 이유를 한 줄로 적어 주세요.</label>
+        <input type="text" id="q3" placeholder="예: 실적 전망이 그대로라서" autocomplete="off">
+        <p class="err" id="err-q3" role="alert"></p>
+        <p class="help">이름·계좌번호 같은 개인정보는 적지 마세요. 메모는 이 브라우저에만 저장돼요.</p>
+      </div>
+
+      <button type="button" id="save" class="btn">메모 저장</button>
+      <p class="err" id="err-save" role="alert"></p>
+      <div id="result" aria-live="polite"></div>
+      <div id="prev"></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="ban">수업 과제 데모 · 투자 판단 근거 아님</span>
+    <p>이 숫자는 교육용 참고이며 투자 판단의 근거가 아니에요.</p>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

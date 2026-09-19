@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><title>F-01 단위 테스트 (R-01~R-04)</title>
+<body style="font-family:system-ui,'Malgun Gothic',sans-serif;padding:24px;max-width:900px">
+<h1>F-01 자동 검사 · R-01~R-04 (UT-01~UT-05)</h1>
+<p>기대값은 <code>docs/qa_scenarios.md</code>에서 가져왔고 구현 결과를 보고 바꾸지 않았습니다. 화면에 보이는 문자열까지 똑같은지 비교합니다.</p>
+<ol id="out"></ol><p id="sum" style="font-weight:800"></p>
+<script src="data.js"></script><script src="app.js"></script>
+<script>
+var T = [];
+function t(id, name, fn) {
+  var ok = false, msg = '';
+  try { ok = fn() === true; } catch (e) { msg = e.message; }
+  T.push([id, name, ok, msg]);
+}
+function has(text, part) { return text.indexOf(part) !== -1; }
+function joinFacts(c) { return c.facts.map(function (f) { return f.label + ' ' + f.value; }).join(' | '); }
+
+/* ---- UT-01 · pctChange ---- */
+t('UT-01', 'pctChange(1441.97, 1524.80) = 5.74', function () { return pctChange(1441.97, 1524.80) === 5.74; });
+t('UT-01', 'pctChange(5791.91, 5093.54) = -12.06', function () { return pctChange(5791.91, 5093.54) === -12.06; });
+t('UT-01', '화면 표시 fmtPct(5.74) = "+5.74%"', function () { return fmtPct(5.74) === '+5.74%'; });
+t('UT-01', '화면 표시 fmtPct(-12.06) = "−12.06%" (진짜 마이너스 기호)', function () { return fmtPct(-12.06) === '−12.06%'; });
+t('UT-01', '화면 표시 fmtNum(5791.91) = "5,791.91", fmtNum(1524.8) = "1,524.80"', function () { return fmtNum(5791.91) === '5,791.91' && fmtNum(1524.8) === '1,524.80'; });
+
+/* ---- UT-01 · compoundChange ---- */
+t('UT-01', 'compoundChange(-9.88, -11.74) = -20.46', function () { return compoundChange(-9.88, -11.74) === -20.46; });
+t('UT-01', 'compoundChange(-11.5, -9.58) = -19.98', function () { return compoundChange(-11.5, -9.58) === -19.98; });
+
+/* ---- UT-01 · buildCard ---- */
+t('UT-01', 'buildCard("반도체"): market.pct=-12.06, fx.pct=5.74', function () {
+  var c = buildCard('반도체'); return c.ok === true && c.market.pct === -12.06 && c.fx.pct === 5.74;
+});
+t('UT-01', 'buildCard("반도체"): 시장·환율 표시 범위 문자열', function () {
+  var c = buildCard('반도체');
+  return c.market.range === '5,791.91 → 5,093.54' && c.fx.range === '1,441.97 → 1,524.80원';
+});
+t('UT-01', 'buildCard 사실 항목마다 value·asOf·source가 비어 있지 않음 (반도체·방산)', function () {
+  return ['반도체', '방산'].every(function (s) {
+    var c = buildCard(s);
+    return c.facts.length > 0 && c.facts.every(function (f) { return f.value && f.asOf && f.source; });
+  });
+});
+t('UT-01', 'buildCard("반도체") 삼성전자 항목 문자열 정확히 일치', function () {
+  var c = buildCard('반도체');
+  return c.facts[0].value === '3월 3일 −9.88% → 3월 4일 −11.74% (이틀 누적 −20.46%)';
+});
+t('UT-01', 'buildCard("반도체") SK하이닉스 항목 문자열 정확히 일치', function () {
+  var c = buildCard('반도체');
+  return c.facts[1].value === '3월 3일 −11.5% → 3월 4일 −9.58% (이틀 누적 −19.98%)';
+});
+t('UT-01', 'buildCard("반도체") 「삼성전자」「−11.74%」「SK하이닉스」「−9.58%」「−20.46%」「−19.98%」 포함', function () {
+  var s = joinFacts(buildCard('반도체'));
+  return ['삼성전자', '−11.74%', 'SK하이닉스', '−9.58%', '−20.46%', '−19.98%'].every(function (p) { return has(s, p); });
+});
+t('UT-01', 'buildCard("반도체") 「이 카드로 알 수 없는 것」 6개', function () { return buildCard('반도체').unknown.length === 6; });
+t('UT-01', 'buildCard("방산") 「LIG넥스원」「상한가」 포함, 알 수 없는 것 5개', function () {
+  var c = buildCard('방산'); var s = joinFacts(c);
+  return has(s, 'LIG넥스원') && has(s, '상한가') && c.unknown.length === 5;
+});
+
+/* ---- UT-01 · buildMemoSummary ---- */
+t('UT-01', 'buildMemoSummary 문자열 정확히 일치', function () {
+  return buildMemoSummary({ q1: '버텼어요', q2: '같아요', q3: '실적 전망이 그대로라서' }) ===
+    '내 판단: 버텼어요 · 이유 유지: 같아요 · 이유: 실적 전망이 그대로라서';
+});
+
+/* ---- UT-02 · R-02 빈값 (안내 문구 문장까지 정확히 비교) ---- */
+t('UT-02', 'validateSector("") → ok:false, 「보유 업종을 먼저 골라 주세요.」', function () {
+  var v = validateSector('');
+  return v.ok === false && v.message === '보유 업종을 먼저 골라 주세요.';
+});
+t('UT-02', 'validateSector("반도체") → ok:true', function () { return validateSector('반도체').ok === true; });
+t('UT-02', 'validateMemo({q1:"",q2:"",q3:"   "}) → ok:false, 세 안내 문장 정확히 일치(공백만 = 빈칸)', function () {
+  var v = validateMemo({ q1: '', q2: '', q3: '   ' });
+  return v.ok === false &&
+    v.errors.q1 === '내 판단을 하나 골라 주세요.' &&
+    v.errors.q2 === '이유가 지금도 같은지 골라 주세요.' &&
+    v.errors.q3 === '이유를 한 줄로 적어 주세요.';
+});
+t('UT-02', 'validateMemo 일부만 비었을 때 비어 있는 칸의 안내만 있음(q2만)', function () {
+  var v = validateMemo({ q1: '버텼어요', q2: '', q3: '실적 전망이 그대로라서' });
+  var keys = Object.keys(v.errors);
+  return v.ok === false && keys.length === 1 && keys[0] === 'q2' && v.errors.q2 === '이유가 지금도 같은지 골라 주세요.';
+});
+t('UT-02', 'validateMemo 모두 채우면 ok:true, errors 없음', function () {
+  var v = validateMemo({ q1: '버텼어요', q2: '같아요', q3: '실적 전망이 그대로라서' });
+  return v.ok === true && Object.keys(v.errors).length === 0;
+});
+
+/* ---- UT-03 · R-03 잘못된 입력 (경계값 80/81자, 목록에 없는 업종) ---- */
+function rep(ch, n) { var s = ''; for (var i = 0; i < n; i++) { s += ch; } return s; }
+function memoWith(q3) { return { q1: '버텼어요', q2: '같아요', q3: q3 }; }
+t('UT-03', '이유 80자는 통과 (경계값)', function () { return validateMemo(memoWith(rep('가', 80))).ok === true; });
+t('UT-03', '이유 81자는 「이유는 80자 이내로 적어 주세요. (현재 81자)」', function () {
+  var v = validateMemo(memoWith(rep('가', 81)));
+  return v.ok === false && v.errors.q3 === '이유는 80자 이내로 적어 주세요. (현재 81자)' && Object.keys(v.errors).length === 1;
+});
+t('UT-03', '이유 100자는 「(현재 100자)」로 실제 글자 수를 보여 줌', function () {
+  return validateMemo(memoWith(rep('가', 100))).errors.q3 === '이유는 80자 이내로 적어 주세요. (현재 100자)';
+});
+t('UT-03', '앞뒤 띄어쓰기는 글자 수에서 빼고 셈 (공백 + 80자 + 공백 = 통과)', function () {
+  return validateMemo(memoWith(' ' + rep('가', 80) + ' ')).ok === true;
+});
+t('UT-03', '이유가 비었을 때는 R-02 문구 그대로 (81자 문구와 섞이지 않음)', function () {
+  return validateMemo(memoWith('')).errors.q3 === '이유를 한 줄로 적어 주세요.';
+});
+t('UT-03', 'validateSector("금융") → ok:false, 「지원하지 않는 업종이에요. 반도체 또는 방산 중에서 골라 주세요.」', function () {
+  var v = validateSector('금융');
+  return v.ok === false && v.message === '지원하지 않는 업종이에요. 반도체 또는 방산 중에서 골라 주세요.';
+});
+t('UT-03', 'validateSector("반도체")·("방산") → ok:true', function () {
+  return validateSector('반도체').ok === true && validateSector('방산').ok === true;
+});
+t('UT-03', 'validateSector("")는 여전히 R-02 문구 「보유 업종을 먼저 골라 주세요.」', function () {
+  return validateSector('').message === '보유 업종을 먼저 골라 주세요.';
+});
+
+/* ---- UT-04 · R-04 저장 실패 (저장소 대역으로 확인) ---- */
+var goodMemo = { sector: '반도체', q1: '버텼어요', q2: '같아요', q3: '실적 전망이 그대로라서' };
+function throwingStorage() { return { setItem: function () { throw new Error('blocked'); }, getItem: function () { throw new Error('blocked'); } }; }
+function memoryStorage() { var d = {}; return { setItem: function (k, v) { d[k] = String(v); }, getItem: function (k) { return d.hasOwnProperty(k) ? d[k] : null; }, dump: d }; }
+t('UT-04', 'saveMemo: 저장소가 오류를 던지면 {ok:false, 「이 브라우저에서는 메모를 저장할 수 없어요. 화면의 내용은 그대로 두었어요.」}', function () {
+  var r = saveMemo(goodMemo, throwingStorage());
+  return r.ok === false && r.message === '이 브라우저에서는 메모를 저장할 수 없어요. 화면의 내용은 그대로 두었어요.';
+});
+t('UT-04', 'saveMemo: 정상 저장소면 {ok:true}이고 키 f01_judgment_memo에 같은 메모가 JSON으로 저장됨', function () {
+  var s = memoryStorage();
+  var r = saveMemo(goodMemo, s);
+  var saved = JSON.parse(s.getItem('f01_judgment_memo'));
+  return r.ok === true && saved.sector === '반도체' && saved.q1 === '버텼어요' && saved.q2 === '같아요' &&
+    saved.q3 === '실적 전망이 그대로라서' && typeof saved.savedAt === 'string';
+});
+t('UT-04', 'loadMemo: 저장소가 오류를 던져도 null을 돌려주고 멈추지 않음', function () { return loadMemo('반도체', throwingStorage()) === null; });
+t('UT-04', 'loadMemo: 방금 저장한 메모를 같은 업종으로 불러오고, 다른 업종이면 null', function () {
+  var s = memoryStorage(); saveMemo(goodMemo, s);
+  var same = loadMemo('반도체', s), other = loadMemo('방산', s);
+  return same !== null && same.q3 === '실적 전망이 그대로라서' && other === null;
+});
+
+/* ---- UT-05 · R-04 데이터 불러오기 실패 ---- */
+t('UT-05', 'loadCardData(undefined) → {ok:false, 「카드 데이터를 불러오지 못했어요. 페이지를 새로 고침해 주세요.」}', function () {
+  var r = loadCardData(undefined);
+  return r.ok === false && r.message === '카드 데이터를 불러오지 못했어요. 페이지를 새로 고침해 주세요.';
+});
+t('UT-05', 'loadCardData({}) 와 업종이 빠진 데이터도 ok:false', function () {
+  return loadCardData({}).ok === false && loadCardData({ sectors: { '반도체': {} } }).ok === false;
+});
+t('UT-05', 'loadCardData(CARD_DATA) → ok:true, 업종 키가 「반도체」·「방산」', function () {
+  var r = loadCardData(CARD_DATA);
+  var keys = Object.keys(CARD_DATA.sectors);
+  return r.ok === true && keys.length === 2 && keys.indexOf('반도체') !== -1 && keys.indexOf('방산') !== -1;
+});
+
+/* ---- 표시 ---- */
+var o = document.getElementById('out'), p = 0;
+T.forEach(function (r) {
+  if (r[2]) { p++; }
+  var li = document.createElement('li');
+  li.textContent = (r[2] ? 'PASS' : 'FAIL') + ' · ' + r[0] + ' · ' + r[1] + (r[3] ? ' · ' + r[3] : '');
+  li.style.color = r[2] ? 'green' : 'red';
+  o.appendChild(li);
+});
+document.getElementById('sum').textContent = p + '/' + T.length + ' 통과 (UT-01~UT-05 실행)';
+document.title = p + '/' + T.length;
+</script></body></html>
